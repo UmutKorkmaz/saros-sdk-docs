@@ -1,0 +1,36 @@
+{
+  "name": "saros-swap-with-slippage",
+  "version": "1.0.0",
+  "description": "Production-ready token swap implementation with dynamic slippage protection using Saros SDK",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "test": "ts-node src/test.ts",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@saros-finance/sdk": "^2.4.0",
+    "@solana/web3.js": "^1.78.0",
+    "@solana/spl-token": "^0.3.8",
+    "bs58": "^5.0.0",
+    "dotenv": "^16.3.1",
+    "winston": "^3.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6"
+  },
+  "keywords": [
+    "saros",
+    "solana",
+    "defi",
+    "swap",
+    "amm",
+    "slippage"
+  ],
+  "author": "Saros SDK Documentation",
+  "license": "MIT"
+}
