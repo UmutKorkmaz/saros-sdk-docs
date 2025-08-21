@@ -1,0 +1,48 @@
+{
+  "name": "saros-sdk-documentation",
+  "version": "1.0.0",
+  "description": "Comprehensive developer documentation for Saros Finance SDKs",
+  "private": true,
+  "workspaces": [
+    "code-examples/typescript/*"
+  ],
+  "scripts": {
+    "build": "npm run build:examples",
+    "build:examples": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "dev:swap": "npm run dev -w code-examples/typescript/01-swap-with-slippage",
+    "dev:compound": "npm run dev -w code-examples/typescript/02-auto-compound",
+    "dev:il": "npm run dev -w code-examples/typescript/03-impermanent-loss-calc",
+    "dev:range": "npm run dev -w code-examples/typescript/04-dlmm-range-orders",
+    "dev:routing": "npm run dev -w code-examples/typescript/05-multi-hop-routing",
+    "install:all": "npm install --workspaces",
+    "clean": "npm run clean --workspaces",
+    "lint": "npm run lint --workspaces",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/saros-finance/sdk-documentation"
+  },
+  "keywords": [
+    "saros",
+    "solana",
+    "defi",
+    "amm",
+    "dlmm",
+    "sdk",
+    "documentation",
+    "typescript",
+    "rust"
+  ],
+  "author": "Saros Finance",
+  "license": "MIT",
+  "devDependencies": {
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.2"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}
