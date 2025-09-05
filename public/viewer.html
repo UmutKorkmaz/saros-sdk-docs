@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saros SDK Documentation</title>
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/viewer.css">
+    
+    <!-- Markdown Parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+    
+    <!-- Mermaid for Diagrams -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="navbar-brand">
+                🚀 Saros SDK Docs
+            </a>
+            <div class="navbar-nav">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="viewer.html?doc=getting-started/installation" class="nav-link">Docs</a>
+                <a href="viewer.html?doc=api-reference/typescript-sdk" class="nav-link">API</a>
+                <a href="viewer.html?doc=EXAMPLE_GALLERY" class="nav-link">Examples</a>
+                <a href="https://github.com/saros-finance" class="nav-link">GitHub</a>
+            </div>
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-title">Getting Started</div>
+            <a href="?doc=getting-started/prerequisites" class="sidebar-link">Prerequisites</a>
+            <a href="?doc=getting-started/installation" class="sidebar-link">Installation</a>
+            <a href="?doc=getting-started/configuration" class="sidebar-link">Configuration</a>
+            <a href="?doc=getting-started/first-transaction" class="sidebar-link">First Transaction</a>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-title">Core Concepts</div>
+            <a href="?doc=core-concepts/amm-vs-dlmm" class="sidebar-link">AMM vs DLMM</a>
+            <a href="?doc=core-concepts/bin-liquidity" class="sidebar-link">Bin Liquidity</a>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-title">API Reference</div>
+            <a href="?doc=api-reference/typescript-sdk" class="sidebar-link">TypeScript SDK</a>
+            <a href="?doc=api-reference/dlmm-sdk" class="sidebar-link">DLMM SDK</a>
+            <a href="?doc=api-reference/rust-sdk" class="sidebar-link">Rust SDK</a>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-title">Guides</div>
+            <a href="?doc=guides/sdk-comparison" class="sidebar-link">SDK Comparison</a>
+            <a href="?doc=guides/liquidity-provision" class="sidebar-link">Liquidity Provision</a>
+            <a href="?doc=guides/dlmm-deep-dive" class="sidebar-link">DLMM Deep Dive</a>
+            <a href="?doc=guides/advanced-swap-operations" class="sidebar-link">Advanced Swaps</a>
+            <a href="?doc=guides/dlmm-position-management" class="sidebar-link">Position Management</a>
+            <a href="?doc=guides/dlmm-quote-system" class="sidebar-link">Quote System</a>
+            <a href="?doc=guides/security-best-practices" class="sidebar-link">Security</a>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-title">Tutorials</div>
+            <a href="?doc=tutorials/01-basic-swap" class="sidebar-link">Basic Swap</a>
+            <a href="?doc=tutorials/02-add-liquidity" class="sidebar-link">Add Liquidity</a>
+            <a href="?doc=tutorials/03-yield-farming" class="sidebar-link">Yield Farming</a>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-title">TypeScript Examples</div>
+            <a href="?doc=../code-examples/typescript/01-swap-with-slippage/README" class="sidebar-link">🔄 Swap with Slippage</a>
+            <a href="?doc=../code-examples/typescript/02-auto-compound/README" class="sidebar-link">⚡ Auto-Compound</a>
+            <a href="?doc=../code-examples/typescript/03-impermanent-loss-calc/README" class="sidebar-link">📊 IL Calculator</a>
+            <a href="?doc=../code-examples/typescript/04-dlmm-range-orders/README" class="sidebar-link">🎯 Range Orders</a>
+            <a href="?doc=../code-examples/typescript/05-multi-hop-routing/README" class="sidebar-link">🛣️ Multi-Hop Routing</a>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-title">Rust Examples</div>
+            <a href="?doc=../code-examples/rust/01-basic-swap/README" class="sidebar-link">⚡ Basic Swap</a>
+            <a href="?doc=../code-examples/rust/02-auto-compound/README" class="sidebar-link">🔄 Auto-Compound</a>
+            <a href="?doc=../code-examples/rust/03-impermanent-loss-calc/README" class="sidebar-link">📊 IL Calculator</a>
+            <a href="?doc=../code-examples/rust/04-dlmm-range-orders/README" class="sidebar-link">🎯 Range Orders</a>
+            <a href="?doc=../code-examples/rust/05-multi-hop-routing/README" class="sidebar-link">🛣️ Multi-Hop Routing</a>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-title">Architecture</div>
+            <a href="?doc=architecture/diagrams" class="sidebar-link">System Diagrams</a>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-title">Resources</div>
+            <a href="?doc=README" class="sidebar-link">Overview</a>
+            <a href="?doc=EXAMPLE_GALLERY" class="sidebar-link">Example Gallery</a>
+            <a href="?doc=troubleshooting" class="sidebar-link">Troubleshooting</a>
+            <a href="?doc=DEPLOYMENT_GUIDE" class="sidebar-link">Deployment Guide</a>
+            <a href="?doc=CONTRIBUTING" class="sidebar-link">Contributing</a>
+            <a href="?doc=CHALLENGE_REQUIREMENTS_CHECKLIST" class="sidebar-link">Requirements</a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-wrapper">
+            <div class="breadcrumb" id="breadcrumb">
+                <a href="index.html">Home</a>
+                <span class="breadcrumb-separator">›</span>
+                <span id="breadcrumb-current">Documentation</span>
+            </div>
+
+            <article class="article" id="content">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </article>
+        </div>
+    </main>
+
+    <!-- Table of Contents -->
+    <div class="toc" id="toc" style="display: none;">
+        <div class="toc-title">On This Page</div>
+        <div id="toc-content"></div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/viewer.js"></script>
+</body>
+</html>

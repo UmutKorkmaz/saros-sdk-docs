@@ -1,0 +1,997 @@
+//! Basic Swap Example - Simplified Working Version
+//! 
+//! This example demonstrates how to perform basic token swaps using the Saros DLMM SDK.
+//! Features: Simple swap functionality with mock data
+
+use anyhow::{Result, anyhow};
+use clap::{Parser, Subcommand};
+use log::{info, warn, error};
+use rust_decimal::Decimal;
+use saros_dlmm_sdk::{DLMMClient, types::*};
+use std::str::FromStr;
+
+/// Command line interface for the basic swap example
+#[derive(Parser)]
+#[command(name = "basic-swap")]
+#[command(about = "Basic token swap operations with Saros DLMM SDK")]
+struct Cli {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    /// Execute a simple token swap
+    Swap {
+        /// Amount to swap
+        #[arg(short, long)]
+        amount: f64,
+        /// Input token (e.g., SOL, USDC)
+        #[arg(long)]
+        token_in: String,
+        /// Output token (e.g., SOL, USDC)  
+        #[arg(long)]
+        token_out: String,
+        /// Maximum slippage in percentage (default: 0.5%)
+        #[arg(long, default_value = "0.5")]
+        max_slippage: f64,
+    },
+    /// Get pool information
+    Pool {
+        /// Pool address to query
+        #[arg(short, long)]
+        address: String,
+    },
+}
+    batch_size: usize,
+    // Advanced features
+    enable_price_analysis: bool,
+    enable_mev_protection: bool,
+    enable_optimization: bool,
+    enable_portfolio_rebalancing: bool,
+    // Performance settings
+    connection_pool_size: usize,
+    max_concurrent_swaps: usize,
+    // Risk management
+    max_slippage_bps: u16,
+    max_position_size_percent: f64,
+    // Demo and testing
+    simulate_only: bool,
+    run_benchmarks: bool,
+    verbose_output: bool,
+}
+
+/// Token pair configuration for multi-token swaps
+#[derive(Debug, Clone)]
+struct TokenPair {
+    token_in: Pubkey,
+    token_out: Pubkey,
+    pool_address: Pubkey,
+    amount_in: u64,
+    minimum_amount_out: u64,
+    priority: u8,
+}
+
+impl Default for AdvancedSwapConfig {
+    fn default() -> Self {
+        Self {
+            rpc_url: "https://api.devnet.solana.com".to_string(),
+            wallet_path: "~/.config/solana/id.json".to_string(),
+            token_pairs: vec![
+                TokenPair {
+                    token_in: Pubkey::from_str("So11111111111111111111111111111111111111112").unwrap(), // SOL
+                    token_out: Pubkey::from_str("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v").unwrap(), // USDC
+                    pool_address: Pubkey::from_str("11111111111111111111111111111112").unwrap(), // Mock pool
+                    amount_in: 1_000_000_000, // 1 SOL
+                    minimum_amount_out: 48_000_000, // 48 USDC
+                    priority: 1,
+                },
+            ],
+            enable_batch_mode: false,
+            batch_size: 10,
+            enable_price_analysis: true,
+            enable_mev_protection: true,
+            enable_optimization: true,
+            enable_portfolio_rebalancing: false,
+            connection_pool_size: 5,
+            max_concurrent_swaps: 10,
+            max_slippage_bps: 300, // 3%
+            max_position_size_percent: 25.0,
+            simulate_only: false,
+            run_benchmarks: false,
+            verbose_output: false,
+        }
+    }
+}
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    // Initialize logging
+    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
+    
+    // Load environment variables
+    dotenvy::dotenv().ok();
+    
+    println!("{}", "🚀 SAROS ADVANCED SWAP SUITE".bright_cyan().bold());
+    println!("{}", "═══════════════════════════════════════".bright_blue());
+    info!("🚀 Starting Saros Advanced Swap Example");
+    
+    // Parse command line arguments
+    let config = parse_args()?;
+    
+    // Initialize DLMM client
+    let client = initialize_client(&config).await?;
+    
+    // Run benchmarks if requested
+    if config.run_benchmarks {
+        info!("🏁 Running performance benchmarks...");
+        run_benchmarks().await?;
+        return Ok(());
+    }
+    
+    // Execute advanced swap operations
+    match run_advanced_swap_demo(&client, &config).await {
+        Ok(_) => {
+            println!("{}", "✅ Advanced swap demo completed successfully!".bright_green().bold());
+            println!("{}", "═══════════════════════════════════════════════".bright_blue());
+        },
+        Err(e) => {
+            error!("❌ Advanced swap demo failed: {}", e);
+            std::process::exit(1);
+        }
+    }
+    
+    Ok(())
+}
+
+/// Parse command line arguments with advanced options
+fn parse_args() -> Result<AdvancedSwapConfig> {
+    let matches = Command::new("saros-advanced-swap")
+        .version("0.2.0")
+        .about("Advanced token swap suite with MEV protection, batch execution, and portfolio rebalancing")
+        .arg(
+            Arg::new("rpc-url")
+                .long("rpc-url")
+                .value_name("URL")
+                .help("Solana RPC endpoint")
+                .default_value("https://api.devnet.solana.com")
+        )
+        .arg(
+            Arg::new("wallet")
+                .short('w')
+                .long("wallet")
+                .value_name("PATH")
+                .help("Path to wallet keypair file")
+                .default_value("~/.config/solana/id.json")
+        )
+        .arg(
+            Arg::new("pool")
+                .short('p')
+                .long("pool")
+                .value_name("ADDRESS")
+                .help("Pool address for swap")
+                .default_value("11111111111111111111111111111112")
+        )
+        .arg(
+            Arg::new("amount")
+                .short('a')
+                .long("amount")
+                .value_name("LAMPORTS")
+                .help("Amount to swap in lamports")
+                .default_value("1000000000")
+        )
+        .arg(
+            Arg::new("min-out")
+                .short('m')
+                .long("min-out")
+                .value_name("LAMPORTS")
+                .help("Minimum amount out")
+                .default_value("48000000")
+        )
+        .arg(
+            Arg::new("slippage")
+                .short('s')
+                .long("slippage")
+                .value_name("BPS")
+                .help("Slippage tolerance in basis points")
+                .default_value("300")
+        )
+        .arg(
+            Arg::new("simulate")
+                .long("simulate")
+                .help("Only simulate the swap, don't execute")
+                .action(ArgAction::SetTrue)
+        )
+        .arg(
+            Arg::new("batch-mode")
+                .long("batch-mode")
+                .help("Enable batch swap execution")
+                .action(ArgAction::SetTrue)
+        )
+        .arg(
+            Arg::new("batch-size")
+                .long("batch-size")
+                .value_name("SIZE")
+                .help("Number of operations per batch")
+                .default_value("10")
+        )
+        .arg(
+            Arg::new("enable-mev-protection")
+                .long("enable-mev-protection")
+                .help("Enable MEV protection strategies")
+                .action(ArgAction::SetTrue)
+        )
+        .arg(
+            Arg::new("enable-optimization")
+                .long("enable-optimization")
+                .help("Enable swap parameter optimization")
+                .action(ArgAction::SetTrue)
+        )
+        .arg(
+            Arg::new("enable-price-analysis")
+                .long("enable-price-analysis")
+                .help("Enable real-time price analysis")
+                .action(ArgAction::SetTrue)
+        )
+        .arg(
+            Arg::new("portfolio-rebalancing")
+                .long("portfolio-rebalancing")
+                .help("Demonstrate portfolio rebalancing")
+                .action(ArgAction::SetTrue)
+        )
+        .arg(
+            Arg::new("connection-pool-size")
+                .long("connection-pool-size")
+                .value_name("SIZE")
+                .help("Connection pool size for parallel execution")
+                .default_value("5")
+        )
+        .arg(
+            Arg::new("max-concurrent")
+                .long("max-concurrent")
+                .value_name("COUNT")
+                .help("Maximum concurrent swap operations")
+                .default_value("10")
+        )
+        .arg(
+            Arg::new("benchmarks")
+                .long("benchmarks")
+                .help("Run performance benchmarks")
+                .action(ArgAction::SetTrue)
+        )
+        .arg(
+            Arg::new("verbose")
+                .short('v')
+                .long("verbose")
+                .help("Enable verbose output")
+                .action(ArgAction::SetTrue)
+        )
+        .get_matches();
+
+    // Create default token pair if none specified
+    let token_pairs = vec![
+        TokenPair {
+            token_in: Pubkey::from_str("So11111111111111111111111111111111111111112").unwrap(),
+            token_out: Pubkey::from_str("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v").unwrap(),
+            pool_address: Pubkey::from_str(matches.get_one::<String>("pool").unwrap()).unwrap(),
+            amount_in: matches.get_one::<String>("amount").unwrap().parse()?,
+            minimum_amount_out: matches.get_one::<String>("min-out").unwrap().parse()?,
+            priority: 1,
+        }
+    ];
+    
+    Ok(AdvancedSwapConfig {
+        rpc_url: matches.get_one::<String>("rpc-url").unwrap().clone(),
+        wallet_path: matches.get_one::<String>("wallet").unwrap().clone(),
+        token_pairs,
+        enable_batch_mode: matches.get_flag("batch-mode"),
+        batch_size: matches.get_one::<String>("batch-size").unwrap().parse()?,
+        enable_price_analysis: matches.get_flag("enable-price-analysis"),
+        enable_mev_protection: matches.get_flag("enable-mev-protection"),
+        enable_optimization: matches.get_flag("enable-optimization"),
+        enable_portfolio_rebalancing: matches.get_flag("portfolio-rebalancing"),
+        connection_pool_size: matches.get_one::<String>("connection-pool-size").unwrap().parse()?,
+        max_concurrent_swaps: matches.get_one::<String>("max-concurrent").unwrap().parse()?,
+        max_slippage_bps: matches.get_one::<String>("slippage").unwrap().parse()?,
+        max_position_size_percent: 25.0,
+        simulate_only: matches.get_flag("simulate"),
+        run_benchmarks: matches.get_flag("benchmarks"),
+        verbose_output: matches.get_flag("verbose"),
+    })
+}
+
+/// Initialize DLMM client with wallet and advanced configuration
+async fn initialize_client(config: &AdvancedSwapConfig) -> Result<DLMMClient> {
+    info!("🔧 Initializing DLMM client...");
+    info!("   RPC URL: {}", config.rpc_url);
+    
+    // Load wallet keypair
+    let wallet = if Path::new(&config.wallet_path).exists() {
+        info!("   Loading wallet from: {}", config.wallet_path);
+        read_keypair_file(&config.wallet_path)?
+    } else {
+        warn!("   Wallet file not found, generating random keypair for demo");
+        Keypair::new()
+    };
+    
+    info!("   Wallet public key: {}", wallet.pubkey());
+    
+    // Create client with wallet
+    let client = DLMMClient::with_wallet(&config.rpc_url, wallet).await?;
+    
+    info!("✅ DLMM client initialized successfully");
+    Ok(client)
+}
+
+/// Count enabled features for summary
+fn count_enabled_features(config: &AdvancedSwapConfig) -> usize {
+    let mut count = 0;
+    if config.enable_price_analysis { count += 1; }
+    if config.enable_mev_protection { count += 1; }
+    if config.enable_optimization { count += 1; }
+    if config.enable_batch_mode { count += 1; }
+    if config.enable_portfolio_rebalancing { count += 1; }
+    count
+}
+
+/// Initialize advanced components based on configuration
+async fn initialize_advanced_components(config: &AdvancedSwapConfig) -> Result<(
+    Option<PriceAnalyzer>,
+    Option<SwapOptimizer>, 
+    Option<MevProtectionEngine>,
+    Option<BatchExecutor>
+)> {
+    info!("🔧 Initializing advanced components...");
+    
+    let price_analyzer = if config.enable_price_analysis {
+        let analyzer = PriceAnalyzer::with_config(PriceAnalyzerConfig {
+            enable_charts: true,
+            chart_output_dir: "./charts".to_string(),
+            ..Default::default()
+        });
+        Some(analyzer)
+    } else {
+        None
+    };
+    
+    let optimizer = if config.enable_optimization {
+        let opt = SwapOptimizer::with_config(OptimizerConfig {
+            aggressive_optimization: true,
+            gas_optimization: true,
+            mev_protection_level: if config.enable_mev_protection { 3 } else { 1 },
+            ..Default::default()
+        });
+        Some(opt)
+    } else {
+        None
+    };
+    
+    let mev_engine = if config.enable_mev_protection {
+        let engine = MevProtectionEngine::with_config(MevProtectionConfig {
+            protection_level: 3,
+            use_private_mempool: true,
+            enable_flashbots: true,
+            ..Default::default()
+        });
+        engine.start().await?;
+        Some(engine)
+    } else {
+        None
+    };
+    
+    let batch_executor = if config.enable_batch_mode || config.enable_portfolio_rebalancing {
+        let executor = BatchExecutor::with_config(&config.rpc_url, batch_executor::BatchExecutorConfig {
+            connection_pool_size: config.connection_pool_size,
+            max_concurrent_swaps: config.max_concurrent_swaps,
+            enable_parallel_execution: true,
+            risk_management: batch_executor::RiskManagementConfig {
+                max_position_size_percent: config.max_position_size_percent,
+                max_slippage_bps: config.max_slippage_bps,
+                ..Default::default()
+            },
+            ..Default::default()
+        }).await?;
+        Some(executor)
+    } else {
+        None
+    };
+    
+    info!("✅ Advanced components initialized");
+    Ok((price_analyzer, optimizer, mev_engine, batch_executor))
+}
+
+/// Run comprehensive advanced swap demonstration
+async fn run_advanced_swap_demo(client: &DLMMClient, config: &AdvancedSwapConfig) -> Result<()> {
+    info!("🎯 Starting advanced swap demonstration with {} features enabled", 
+          count_enabled_features(config));
+    
+    println!("{}", "📊 CONFIGURATION SUMMARY".bright_magenta().bold());
+    println!("{}", "─────────────────────────".bright_blue());
+    println!("🔗 RPC URL: {}", config.rpc_url.bright_yellow());
+    println!("💰 Token Pairs: {}", config.token_pairs.len().to_string().bright_green());
+    println!("🏊 Connection Pool: {}", config.connection_pool_size.to_string().bright_cyan());
+    println!("⚡ Max Concurrent: {}", config.max_concurrent_swaps.to_string().bright_cyan());
+    println!("🛡️ MEV Protection: {}", if config.enable_mev_protection { "✅".bright_green() } else { "❌".bright_red() });
+    println!("📈 Price Analysis: {}", if config.enable_price_analysis { "✅".bright_green() } else { "❌".bright_red() });
+    println!("🚀 Optimization: {}", if config.enable_optimization { "✅".bright_green() } else { "❌".bright_red() });
+    println!("📦 Batch Mode: {}", if config.enable_batch_mode { "✅".bright_green() } else { "❌".bright_red() });
+    println!();
+    
+    let primary_pair = &config.token_pairs[0];
+    let pool_address = primary_pair.pool_address;
+
+    // Initialize advanced components
+    let (price_analyzer, optimizer, mev_engine, batch_executor) = 
+        initialize_advanced_components(config).await?;
+    
+    // Step 1: Enhanced pool analysis with price monitoring
+    if config.enable_price_analysis {
+        demonstrate_advanced_price_analysis(&price_analyzer.unwrap(), primary_pair.token_in, primary_pair.token_out).await?;
+    } else {
+        demonstrate_basic_pool_info(client, pool_address).await?;
+    }
+    
+    // Step 2: Optimized swap quote with intelligent routing
+    if config.enable_optimization {
+        let pool_addresses = config.token_pairs.iter().map(|tp| tp.pool_address).collect::<Vec<_>>();
+        demonstrate_optimized_swap_quote(&optimizer.unwrap(), primary_pair, &pool_addresses).await?;
+    } else {
+        demonstrate_basic_swap_quote(client, pool_address, primary_pair.amount_in).await?;
+    }
+    
+    // Step 3: MEV protection demonstration
+    if config.enable_mev_protection {
+        demonstrate_mev_protection(&mev_engine.unwrap(), primary_pair).await?;
+    }
+    
+    // Step 4: Batch execution or single swap
+    if config.enable_batch_mode {
+        demonstrate_batch_execution(&batch_executor.unwrap(), config).await?;
+    } else if !config.simulate_only {
+        demonstrate_single_swap_execution(client, config).await?;
+    } else {
+        info!("💡 Simulation mode - skipping actual swap execution");
+    }
+    
+    // Step 5: Portfolio rebalancing demonstration
+    if config.enable_portfolio_rebalancing {
+        demonstrate_portfolio_rebalancing(&batch_executor.unwrap()).await?;
+    }
+    
+    // Step 6: Performance monitoring and statistics
+    demonstrate_performance_monitoring(&optimizer, &mev_engine, &batch_executor).await?;
+    
+    // Step 7: Advanced error handling and recovery
+    demonstrate_advanced_error_handling(client, config).await?;
+    
+    Ok(())
+}
+
+/// Demonstrate advanced price analysis with real-time monitoring
+async fn demonstrate_advanced_price_analysis(analyzer: &PriceAnalyzer, token_in: Pubkey, token_out: Pubkey) -> Result<()> {
+    println!("{}", "\n📈 ADVANCED PRICE ANALYSIS".bright_cyan().bold());
+    println!("{}", "─────────────────────────".bright_blue());
+    
+    // Start price monitoring
+    analyzer.start_monitoring(token_in, token_out).await?;
+    
+    // Wait for some price data to be collected
+    info!("📊 Collecting price data...");
+    sleep(Duration::from_secs(2)).await;
+    
+    // Perform comprehensive market analysis
+    let _analysis = analyzer.analyze_market(token_in, token_out).await?;
+    
+    // Display real-time information with colors
+    analyzer.display_real_time_info(token_in, token_out).await?;
+    
+    // Analyze price impact for different trade sizes
+    let impact_analysis = analyzer.analyze_price_impact(token_in, token_out, 10_000_000_000).await?;
+    
+    println!("\n{}", "💥 PRICE IMPACT ANALYSIS".bright_yellow().bold());
+    println!("{}", "─────────────────────".bright_blue());
+    println!("🎯 Optimal trade size: {:.2} SOL", impact_analysis.optimal_trade_size as f64 / 1e9);
+    println!("📊 Max size for 1% impact: {:.2} SOL", impact_analysis.max_trade_size_1_percent as f64 / 1e9);
+    println!("⚠️ Max size for 5% impact: {:.2} SOL", impact_analysis.max_trade_size_5_percent as f64 / 1e9);
+    
+    Ok(())
+}
+
+/// Demonstrate basic pool information (fallback)
+async fn demonstrate_basic_pool_info(client: &DLMMClient, pool_address: Pubkey) -> Result<()> {
+    println!("{}", "\n🏊 BASIC POOL INFORMATION".bright_cyan().bold());
+    println!("{}", "─────────────────────────".bright_blue());
+    
+    match client.get_pool(pool_address).await {
+        Ok(pool) => {
+            info!("✅ Pool found!");
+            info!("   Address: {}", pool.address);
+            info!("   Token X: {}", pool.token_x);
+            info!("   Token Y: {}", pool.token_y);
+            info!("   Active Bin ID: {}", pool.active_bin_id);
+            info!("   Bin Step: {} ({}%)", pool.bin_step, pool.bin_step as f64 / 100.0);
+            info!("   Total Liquidity: {}", pool.liquidity);
+            info!("   24h Volume: ${:.2}", pool.volume_24h as f64 / 1_000_000.0);
+            info!("   24h Fees: ${:.2}", pool.fees_24h as f64 / 1_000_000.0);
+            info!("   APR: {:.2}%", pool.apr);
+            
+            // Get active bin information
+            match client.get_active_bin(pool_address).await {
+                Ok(bin) => {
+                    info!("   Active Bin Price: ${:.4}", bin.price);
+                    info!("   Active Bin Liquidity: {} X, {} Y", bin.liquidity_x, bin.liquidity_y);
+                }
+                Err(e) => warn!("   Failed to get active bin info: {}", e),
+            }
+        }
+        Err(e) => {
+            error!("❌ Failed to get pool info: {}", e);
+            return Err(e.into());
+        }
+    }
+    
+    Ok(())
+}
+
+/// Demonstrate optimized swap quote with intelligent routing
+async fn demonstrate_optimized_swap_quote(optimizer: &SwapOptimizer, primary_pair: &TokenPair, pool_addresses: &[Pubkey]) -> Result<()> {
+    println!("{}", "\n🚀 OPTIMIZED SWAP QUOTE".bright_cyan().bold());
+    println!("{}", "────────────────────────".bright_blue());
+    
+    let optimization = optimizer.optimize_swap(
+        primary_pair.token_in,
+        primary_pair.token_out,
+        primary_pair.amount_in,
+        pool_addresses,
+    ).await?;
+    
+    println!("✅ {}", "Optimization completed!".bright_green());
+    println!("   Optimization ID: {}", optimization.optimization_id.to_string().bright_yellow());
+    println!("   Routes found: {}", optimization.routes.len().to_string().bright_cyan());
+    println!("   Expected output: {:.4} tokens", optimization.expected_amount_out as f64 / 1e6);
+    println!("   Optimal slippage: {}% ({} bps)", 
+             optimization.optimal_slippage_bps as f64 / 100.0, 
+             optimization.optimal_slippage_bps);
+    println!("   Price impact: {:.4}%", optimization.estimated_price_impact);
+    println!("   Gas cost: {} lamports", optimization.estimated_gas_cost);
+    println!("   Confidence: {:.1}%", optimization.confidence_score * 100.0);
+    
+    // Display route details
+    for (i, route) in optimization.routes.iter().enumerate() {
+        println!("   📍 Route {}: {:.4} → {:.4} tokens ({:.2}% impact)", 
+                 i + 1,
+                 route.amount_in as f64 / 1e9,
+                 route.expected_amount_out as f64 / 1e6,
+                 route.price_impact);
+    }
+    
+    Ok(())
+}
+
+/// Demonstrate basic swap quotes (fallback)
+async fn demonstrate_basic_swap_quote(client: &DLMMClient, pool_address: Pubkey, amount_in: u64) -> Result<()> {
+    println!("{}", "\n💱 BASIC SWAP QUOTE".bright_cyan().bold());
+    println!("{}", "───────────────────".bright_blue());
+    
+    match client.get_quote(pool_address, amount_in, true).await {
+        Ok(quote) => {
+            info!("✅ Quote obtained!");
+            info!("   Amount In: {} lamports ({:.4} SOL)", amount_in, amount_in as f64 / 1e9);
+            info!("   Amount Out: {} lamports ({:.4} USDC)", quote.amount_out, quote.amount_out as f64 / 1e6);
+            info!("   Price Impact: {:.4}%", quote.price_impact);
+            info!("   Fee: {} lamports ({:.6} SOL)", quote.fee, quote.fee as f64 / 1e9);
+            info!("   Route: {} bins", quote.route.len());
+            
+            // Calculate effective rate
+            let effective_rate = quote.amount_out as f64 / amount_in as f64 * 1e3; // USDC per SOL
+            info!("   Effective Rate: {:.4} USDC per SOL", effective_rate);
+        }
+        Err(e) => {
+            error!("❌ Failed to get quote: {}", e);
+            return Err(e.into());
+        }
+    }
+    
+    Ok(())
+}
+
+/// Demonstrate MEV protection strategies
+async fn demonstrate_mev_protection(mev_engine: &MevProtectionEngine, primary_pair: &TokenPair) -> Result<()> {
+    println!("{}", "\n🛡️ MEV PROTECTION STRATEGIES".bright_cyan().bold());
+    println!("{}", "─────────────────────────────".bright_blue());
+    
+    // Create a mock transaction
+    let transaction = solana_sdk::transaction::Transaction::default();
+    
+    // Protect the transaction
+    let tx_id = mev_engine.protect_transaction(transaction, primary_pair.priority).await?;
+    info!("✅ Transaction {} protected with MEV strategies", tx_id);
+    
+    // Wait a moment for protection to be applied
+    sleep(Duration::from_millis(500)).await;
+    
+    // Get protection statistics
+    let stats = mev_engine.get_stats().await;
+    println!("📊 MEV Protection Statistics:");
+    println!("   Transactions protected: {}", stats.transactions_protected);
+    println!("   MEV attacks detected: {}", stats.mev_attacks_detected);
+    println!("   MEV attacks mitigated: {}", stats.mev_attacks_mitigated);
+    println!("   Private mempool success: {:.1}%", stats.private_mempool_success_rate * 100.0);
+    println!("   Flashbot bundle success: {:.1}%", stats.flashbot_bundle_success_rate * 100.0);
+    
+    // Show active attacks if any
+    let active_attacks = mev_engine.get_active_attacks().await;
+    if !active_attacks.is_empty() {
+        println!("⚠️ Active MEV attacks detected: {}", active_attacks.len());
+        for attack in active_attacks.iter().take(3) {
+            println!("   🚨 {:?}: {:.4} SOL potential extraction", 
+                     attack.attack_type, attack.estimated_value_extracted as f64 / 1e9);
+        }
+    } else {
+        println!("✅ No active MEV attacks detected");
+    }
+    
+    Ok(())
+}
+
+/// Demonstrate batch execution capabilities
+async fn demonstrate_batch_execution(batch_executor: &BatchExecutor, config: &AdvancedSwapConfig) -> Result<()> {
+    println!("{}", "\n📦 BATCH EXECUTION DEMONSTRATION".bright_cyan().bold());
+    println!("{}", "──────────────────────────────────".bright_blue());
+    
+    // Create batch operations from token pairs
+    let mut operations = Vec::new();
+    for (i, pair) in config.token_pairs.iter().enumerate() {
+        for j in 0..config.batch_size.min(5) { // Limit for demo
+            operations.push(BatchSwapOperation {
+                operation_id: Uuid::new_v4(),
+                token_in: pair.token_in,
+                token_out: pair.token_out,
+                amount_in: pair.amount_in + (j as u64 * 100_000_000), // Vary amounts
+                minimum_amount_out: pair.minimum_amount_out + (j as u64 * 90_000_000),
+                slippage_bps: config.max_slippage_bps,
+                priority: pair.priority,
+                execution_deadline: Some(chrono::Utc::now() + chrono::Duration::minutes(10)),
+                retry_count: 0,
+                metadata: [("batch_demo".to_string(), format!("pair_{}", i))].into(),
+            });
+        }
+    }
+    
+    info!("🚀 Executing batch of {} operations...", operations.len());
+    
+    let start_time = Instant::now();
+    let result = batch_executor.execute_batch(operations).await?;
+    let execution_time = start_time.elapsed();
+    
+    println!("✅ {}", "Batch execution completed!".bright_green());
+    println!("   Batch ID: {}", result.batch_id.to_string().bright_yellow());
+    println!("   Total operations: {}", result.total_operations);
+    println!("   Successful: {}", result.successful_operations.to_string().bright_green());
+    println!("   Failed: {}", result.failed_operations.to_string().bright_red());
+    println!("   Success rate: {:.1}%", result.execution_metrics.success_rate_percent);
+    println!("   Throughput: {:.1} ops/sec", result.execution_metrics.throughput_ops_per_second);
+    println!("   Total gas used: {}", result.total_gas_used);
+    println!("   Total fees: {}", result.total_fees_paid);
+    println!("   Execution time: {:.2}s", execution_time.as_secs_f64());
+    println!("   Gas efficiency: {:.1}/100", result.execution_metrics.gas_efficiency_score);
+    
+    Ok(())
+}
+
+/// Demonstrate single swap execution
+async fn demonstrate_single_swap_execution(client: &DLMMClient, config: &AdvancedSwapConfig) -> Result<()> {
+    println!("{}", "\n🔄 SINGLE SWAP EXECUTION".bright_cyan().bold());
+    println!("{}", "────────────────────────".bright_blue());
+    
+    let primary_pair = &config.token_pairs[0];
+    let swap_params = SwapParams {
+        pool_address: primary_pair.pool_address,
+        amount_in: primary_pair.amount_in,
+        minimum_amount_out: primary_pair.minimum_amount_out,
+        slippage_bps: config.max_slippage_bps,
+    };
+    
+    info!("🚀 Executing swap...");
+    info!("   Amount In: {} lamports", swap_params.amount_in);
+    info!("   Minimum Out: {} lamports", swap_params.minimum_amount_out);
+    info!("   Slippage: {}% ({} bps)", config.max_slippage_bps as f64 / 100.0, config.max_slippage_bps);
+    
+    match client.swap(swap_params).await {
+        Ok(result) => {
+            info!("✅ Swap executed successfully!");
+            info!("   Transaction: {}", result.signature);
+            info!("   Amount In: {} lamports", result.amount_in);
+            info!("   Amount Out: {} lamports", result.amount_out);
+            info!("   Fee Paid: {} lamports", result.fee);
+            info!("   Price Impact: {:.4}%", result.price_impact);
+            
+            // Calculate swap metrics
+            let effective_rate = result.amount_out as f64 / result.amount_in as f64;
+            let fee_percentage = result.fee as f64 / result.amount_in as f64 * 100.0;
+            
+            info!("📈 Swap Metrics:");
+            info!("   Effective Rate: {:.6}", effective_rate);
+            info!("   Fee Percentage: {:.4}%", fee_percentage);
+            
+            let actual_slippage = (primary_pair.minimum_amount_out as f64 - result.amount_out as f64) 
+                / primary_pair.minimum_amount_out as f64 * 100.0;
+            info!("   Actual Slippage: {:.4}%", actual_slippage.abs());
+        }
+        Err(e) => {
+            error!("❌ Swap execution failed: {}", e);
+            return Err(e.into());
+        }
+    }
+    
+    Ok(())
+}
+
+/// Demonstrate portfolio rebalancing
+async fn demonstrate_portfolio_rebalancing(batch_executor: &BatchExecutor) -> Result<()> {
+    println!("{}", "\n🔄 PORTFOLIO REBALANCING".bright_cyan().bold());
+    println!("{}", "─────────────────────────".bright_blue());
+    
+    // Create sample portfolio balances
+    let mut current_balances = HashMap::new();
+    current_balances.insert(Pubkey::from_str("So11111111111111111111111111111111111111112").unwrap(), 5_000_000_000u64); // 5 SOL
+    current_balances.insert(Pubkey::from_str("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v").unwrap(), 3_000_000_000u64); // 3000 USDC
+    current_balances.insert(Pubkey::from_str("Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB").unwrap(), 1_000_000_000u64); // 1000 USDT
+    
+    // Create target allocation strategy
+    let mut target_allocations = HashMap::new();
+    target_allocations.insert(*current_balances.keys().nth(0).unwrap(), 0.5); // 50% SOL
+    target_allocations.insert(*current_balances.keys().nth(1).unwrap(), 0.3); // 30% USDC
+    target_allocations.insert(*current_balances.keys().nth(2).unwrap(), 0.2); // 20% USDT
+    
+    let strategy = RebalancingStrategy {
+        strategy_id: Uuid::new_v4(),
+        target_allocations,
+        rebalancing_threshold_percent: 5.0,
+        minimum_trade_size: 100_000_000, // 0.1 SOL equivalent
+        maximum_trade_size: 10_000_000_000, // 10 SOL equivalent
+        rebalancing_frequency: chrono::Duration::hours(24),
+        risk_parameters: RiskParameters {
+            max_correlation_threshold: 0.8,
+            max_drawdown_percent: 20.0,
+            value_at_risk_percent: 5.0,
+            position_concentration_limit: 0.4,
+        },
+    };
+    
+    info!("📊 Analyzing portfolio for rebalancing...");
+    let analysis = batch_executor.analyze_portfolio(current_balances, &strategy).await?;
+    
+    println!("✅ Portfolio analysis completed!");
+    println!("   Strategy ID: {}", strategy.strategy_id.to_string().bright_yellow());
+    println!("   Rebalancing operations needed: {}", analysis.rebalancing_operations.len());
+    println!("   Total rebalancing cost: {:.4} SOL", analysis.total_rebalancing_cost as f64 / 1e9);
+    println!("   Portfolio optimization score: {:.2}/1.00", analysis.optimization_score);
+    println!("   Portfolio volatility: {:.2}%", analysis.risk_metrics.portfolio_volatility * 100.0);
+    println!("   Value at Risk (VaR): {:.2}%", analysis.risk_metrics.value_at_risk * 100.0);
+    println!("   Maximum drawdown: {:.2}%", analysis.risk_metrics.maximum_drawdown * 100.0);
+    println!("   Sharpe ratio: {:.2}", analysis.risk_metrics.sharpe_ratio);
+    
+    // Display current vs target allocations
+    println!("\n📈 Allocation Comparison:");
+    for (token, target_pct) in analysis.target_allocations.iter() {
+        let current_pct = analysis.current_allocations.get(token).unwrap_or(&0.0);
+        let diff = target_pct - current_pct;
+        let status = if diff.abs() > 0.05 { "⚠️ REBALANCE" } else { "✅ OK" };
+        println!("   Token {}: Current {:.1}% → Target {:.1}% [{}]", 
+                 token.to_string().chars().take(8).collect::<String>(),
+                 current_pct * 100.0, 
+                 target_pct * 100.0,
+                 status);
+    }
+    
+    if !analysis.rebalancing_operations.is_empty() {
+        info!("🔄 Rebalancing operations would execute {} trades", analysis.rebalancing_operations.len());
+        for (i, op) in analysis.rebalancing_operations.iter().take(3).enumerate() {
+            println!("   {}. {:.2} tokens: {} → {}", 
+                     i + 1,
+                     op.amount_in as f64 / 1e9,
+                     op.token_in.to_string().chars().take(8).collect::<String>(),
+                     op.token_out.to_string().chars().take(8).collect::<String>());
+        }
+    } else {
+        println!("✅ Portfolio is well balanced, no rebalancing needed");
+    }
+    
+    Ok(())
+}
+
+/// Demonstrate performance monitoring
+async fn demonstrate_performance_monitoring(
+    optimizer: &Option<SwapOptimizer>,
+    mev_engine: &Option<MevProtectionEngine>,
+    batch_executor: &Option<BatchExecutor>
+) -> Result<()> {
+    println!("{}", "\n📊 PERFORMANCE MONITORING".bright_cyan().bold());
+    println!("{}", "──────────────────────────".bright_blue());
+    
+    if let Some(opt) = optimizer {
+        let opt_stats = opt.get_stats().await;
+        println!("🚀 Optimization Statistics:");
+        println!("   Total optimizations: {}", opt_stats.total_optimizations);
+        println!("   Success rate: {:.1}%", 
+                 opt_stats.successful_optimizations as f64 / opt_stats.total_optimizations.max(1) as f64 * 100.0);
+        println!("   Average improvement: {:.1} bps", opt_stats.average_improvement_bps);
+        println!("   Cache hit rate: {:.1}%", opt_stats.cache_hit_rate * 100.0);
+        println!("   Average optimization time: {:.1}ms", opt_stats.average_optimization_time_ms);
+        println!("   Gas savings: {} lamports", opt_stats.gas_savings_total);
+    }
+    
+    if let Some(mev) = mev_engine {
+        let mev_stats = mev.get_stats().await;
+        println!("\n🛡️ MEV Protection Statistics:");
+        println!("   Transactions protected: {}", mev_stats.transactions_protected);
+        println!("   MEV attacks detected: {}", mev_stats.mev_attacks_detected);
+        println!("   MEV attacks mitigated: {}", mev_stats.mev_attacks_mitigated);
+        println!("   Frontrunning blocked: {}", mev_stats.frontrunning_attempts_blocked);
+        println!("   Sandwich attacks prevented: {}", mev_stats.sandwich_attacks_prevented);
+        println!("   Protection delay: {:.1}ms", mev_stats.average_protection_delay_ms);
+    }
+    
+    if let Some(batch) = batch_executor {
+        let batch_stats = batch.get_execution_stats().await;
+        println!("\n📦 Batch Execution Statistics:");
+        println!("   Success rate: {:.1}%", batch_stats.success_rate_percent);
+        println!("   Throughput: {:.1} ops/sec", batch_stats.throughput_ops_per_second);
+        println!("   Average execution time: {:.1}ms", batch_stats.average_execution_time_ms);
+        println!("   Gas efficiency score: {:.1}/100", batch_stats.gas_efficiency_score);
+        println!("   Connection pool utilization: {:.1}%", batch_stats.connection_pool_utilization);
+        println!("   Parallel execution improvement: {:.1}%", batch_stats.parallel_execution_improvement);
+    }
+    
+    Ok(())
+}
+
+/// Demonstrate advanced error handling scenarios
+async fn demonstrate_advanced_error_handling(client: &DLMMClient, config: &AdvancedSwapConfig) -> Result<()> {
+    println!("{}", "\n🚨 ADVANCED ERROR HANDLING".bright_cyan().bold());
+    println!("{}", "────────────────────────────".bright_blue());
+    
+    let primary_pair = &config.token_pairs[0];
+    let pool_address = primary_pair.pool_address;
+    
+    // Test 1: High slippage scenario
+    info!("Testing high slippage scenario...");
+    let high_slippage_params = SwapParams {
+        pool_address,
+        amount_in: primary_pair.amount_in,
+        minimum_amount_out: primary_pair.amount_in * 2, // Impossible: expect more out than in
+        slippage_bps: config.max_slippage_bps,
+    };
+    
+    match client.simulate_swap(high_slippage_params).await {
+        Ok(result) => {
+            if !result.success {
+                info!("✅ High slippage correctly detected in simulation");
+            } else {
+                warn!("⚠️ High slippage not detected - this might fail in execution");
+            }
+        }
+        Err(e) => {
+            info!("✅ High slippage correctly rejected: {}", e);
+        }
+    }
+    
+    // Test 2: Invalid pool address
+    info!("Testing invalid pool address...");
+    let invalid_pool = Pubkey::new_unique();
+    match client.get_pool(invalid_pool).await {
+        Ok(_) => info!("   Mock client returned data for invalid pool (expected in demo)"),
+        Err(e) => info!("✅ Invalid pool correctly rejected: {}", e),
+    }
+    
+    // Test 3: Network timeout simulation
+    info!("Testing timeout scenarios...");
+    let timeout_result = tokio::time::timeout(
+        Duration::from_millis(100), // Very short timeout
+        client.get_quote(pool_address, 1000000, true)
+    ).await;
+    
+    match timeout_result {
+        Ok(Ok(_)) => info!("   Quote completed within timeout"),
+        Ok(Err(e)) => info!("   Quote failed: {}", e),
+        Err(_) => info!("✅ Timeout handling working correctly"),
+    }
+    
+    // Test 4: Recovery mechanisms
+    info!("Testing recovery mechanisms...");
+    let mut retry_count = 0;
+    let max_retries = 3;
+    
+    loop {
+        match client.get_quote(pool_address, primary_pair.amount_in, true).await {
+            Ok(_) => {
+                info!("✅ Operation succeeded after {} retries", retry_count);
+                break;
+            }
+            Err(e) => {
+                retry_count += 1;
+                if retry_count >= max_retries {
+                    info!("❌ Operation failed after {} retries: {}", max_retries, e);
+                    break;
+                }
+                info!("   Retry {}/{} after error: {}", retry_count, max_retries, e);
+                sleep(Duration::from_millis(100 * retry_count)).await;
+            }
+        }
+    }
+    
+    println!("✅ Error handling demonstration completed");
+    
+    Ok(())
+}
+
+/// Run comprehensive benchmarks
+async fn run_benchmarks() -> Result<()> {
+    println!("{}", "🏁 PERFORMANCE BENCHMARKS".bright_magenta().bold());
+    println!("{}", "═══════════════════════════".bright_blue());
+    
+    // Swap Optimizer Benchmark
+    println!("{}", "\n🚀 Swap Optimizer Benchmark".bright_yellow().bold());
+    benchmark_optimizer().await?;
+    
+    // MEV Protection Benchmark
+    println!("{}", "\n🛡️ MEV Protection Benchmark".bright_yellow().bold());
+    benchmark_mev_protection().await?;
+    
+    // Batch Executor Benchmark
+    println!("{}", "\n📦 Batch Executor Benchmark".bright_yellow().bold());
+    benchmark_batch_executor().await?;
+    
+    println!("{}", "\n✅ All benchmarks completed successfully!".bright_green().bold());
+    println!("{}", "═══════════════════════════════════════".bright_blue());
+    
+    Ok(())
+}
+
+/// Calculate lamports from SOL amount
+#[allow(dead_code)]
+fn sol_to_lamports(sol: f64) -> u64 {
+    (sol * 1e9) as u64
+}
+
+/// Calculate SOL from lamports amount  
+#[allow(dead_code)]
+fn lamports_to_sol(lamports: u64) -> f64 {
+    lamports as f64 / 1e9
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn test_conversions() {
+        assert_eq!(sol_to_lamports(1.0), 1_000_000_000);
+        assert_eq!(lamports_to_sol(1_000_000_000), 1.0);
+        assert_eq!(sol_to_lamports(0.5), 500_000_000);
+    }
+    
+    #[test]
+    fn test_default_config() {
+        let config = AdvancedSwapConfig::default();
+        assert_eq!(config.token_pairs.len(), 1);
+        assert_eq!(config.max_slippage_bps, 300);
+        assert!(!config.simulate_only);
+        assert!(config.enable_price_analysis);
+        assert!(config.enable_mev_protection);
+        assert!(config.enable_optimization);
+    }
+    
+    #[test]
+    fn test_feature_counting() {
+        let mut config = AdvancedSwapConfig::default();
+        config.enable_price_analysis = true;
+        config.enable_mev_protection = true;
+        config.enable_optimization = true;
+        config.enable_batch_mode = true;
+        config.enable_portfolio_rebalancing = true;
+        
+        assert_eq!(count_enabled_features(&config), 5);
+    }
+}

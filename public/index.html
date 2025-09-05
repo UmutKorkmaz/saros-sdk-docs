@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saros SDK Documentation Hub - Build Next-Gen DeFi on Solana</title>
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/home.css">
+</head>
+<body>
+    <div class="loader" id="loader">
+        <div class="loader-circle"></div>
+    </div>
+
+    <div class="bg-animation"></div>
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <div class="container">
+        <section class="hero">
+            <h1 class="hero-title">Saros SDK Documentation</h1>
+            <p class="hero-subtitle">Build Next-Generation DeFi Applications on Solana with Advanced DLMM Technology</p>
+            
+            <div class="version-badges">
+                <div class="version-badge typescript">
+                    <span>⚡</span>
+                    TypeScript SDK v2.4.0
+                </div>
+                <div class="version-badge dlmm">
+                    <span>🔷</span>
+                    DLMM SDK v1.3.2
+                </div>
+                <div class="version-badge rust">
+                    <span>🦀</span>
+                    Rust SDK v0.1.5
+                </div>
+            </div>
+        </section>
+
+        <div class="terminal">
+            <div class="terminal-dots">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+            </div>
+            <div class="terminal-content">
+                <div class="terminal-line">
+                    <span class="terminal-prompt">$</span>
+                    <span class="terminal-comment"># TypeScript Quick Start</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="terminal-prompt">$</span>
+                    <span class="terminal-command">npm install @saros-finance/sdk @saros-finance/dlmm-sdk</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="terminal-prompt">$</span>
+                    <span class="terminal-command">cd code-examples/typescript/01-swap-with-slippage && npm run dev</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="terminal-prompt">$</span>
+                    <span class="terminal-comment"># Rust Quick Start</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="terminal-prompt">$</span>
+                    <span class="terminal-command">cd code-examples/rust && cargo build --release</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="terminal-prompt">$</span>
+                    <span class="terminal-command">cd 01-basic-swap && cargo run -- --simulate</span>
+                    <span class="terminal-comment">&nbsp; # 🚀 Launch!</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🚀</div>
+                <h3>Getting Started</h3>
+                <p>New to Saros? Start here with our comprehensive guides to get up and running in minutes.</p>
+                <div class="feature-links">
+                    <a href="viewer.html?doc=getting-started/prerequisites" class="btn btn-primary">
+                        <span>Prerequisites</span>
+                    </a>
+                    <a href="viewer.html?doc=WALLET_SETUP_SUMMARY" class="btn btn-secondary">
+                        <span>🔐 Wallet Setup</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">💡</div>
+                <h3>Core Concepts</h3>
+                <p>Understand the fundamentals of AMM, DLMM, and advanced DeFi concepts with visual guides.</p>
+                <div class="feature-links">
+                    <a href="viewer.html?doc=core-concepts/amm-vs-dlmm" class="btn btn-primary">
+                        <span>AMM vs DLMM</span>
+                    </a>
+                    <a href="viewer.html?doc=core-concepts/bin-liquidity" class="btn btn-secondary">
+                        <span>Bin Liquidity</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">📚</div>
+                <h3>API Reference</h3>
+                <p>Complete API documentation for TypeScript, DLMM, and Rust SDKs with examples.</p>
+                <div class="feature-links">
+                    <a href="viewer.html?doc=api-reference/typescript-sdk" class="btn btn-primary">
+                        <span>TypeScript</span>
+                    </a>
+                    <a href="viewer.html?doc=api-reference/dlmm-sdk" class="btn btn-secondary">
+                        <span>DLMM SDK</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🔧</div>
+                <h3>Advanced Guides</h3>
+                <p>Deep dive into DLMM mechanics, position management, and optimization strategies.</p>
+                <div class="feature-links">
+                    <a href="viewer.html?doc=guides/dlmm-deep-dive" class="btn btn-primary">
+                        <span>DLMM Deep Dive</span>
+                    </a>
+                    <a href="viewer.html?doc=guides/liquidity-provision" class="btn btn-secondary">
+                        <span>LP Strategies</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">💻</div>
+                <h3>Code Examples</h3>
+                <p>Production-ready examples with full implementations, testing, and best practices.</p>
+                <div class="feature-links">
+                    <a href="viewer.html?doc=EXAMPLE_GALLERY" class="btn btn-primary">
+                        <span>Example Gallery</span>
+                    </a>
+                    <a href="viewer.html?doc=tutorials/01-basic-swap" class="btn btn-secondary">
+                        <span>Tutorials</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🛠️</div>
+                <h3>DevOps & Deploy</h3>
+                <p>Deploy your applications with confidence using our deployment guides and tools.</p>
+                <div class="feature-links">
+                    <a href="viewer.html?doc=DEPLOYMENT_GUIDE" class="btn btn-primary">
+                        <span>Deploy Guide</span>
+                    </a>
+                    <a href="viewer.html?doc=troubleshooting" class="btn btn-secondary">
+                        <span>Troubleshooting</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <section class="examples-section">
+            <h2 class="section-title">Production-Ready Examples</h2>
+            
+            <div class="language-tabs">
+                <button class="language-tab active" onclick="showExamples('typescript')">
+                    <span>⚡</span> TypeScript
+                </button>
+                <button class="language-tab" onclick="showExamples('rust')">
+                    <span>🦀</span> Rust
+                </button>
+            </div>
+            
+            <div id="typescript-examples" class="examples-grid">
+                <div class="example-card">
+                    <span class="difficulty-badge beginner">Beginner</span>
+                    <span class="language-badge typescript">TypeScript</span>
+                    <h4>Swap with Dynamic Slippage</h4>
+                    <p>Production swaps with dynamic slippage calculation and MEV protection.</p>
+                    <a href="viewer.html?doc=code-examples/typescript/01-swap-with-slippage/README" class="btn btn-primary">View Example</a>
+                </div>
+
+                <div class="example-card">
+                    <span class="difficulty-badge intermediate">Intermediate</span>
+                    <span class="language-badge typescript">TypeScript</span>
+                    <h4>Auto-Compound Yields</h4>
+                    <p>Automated yield optimization with multi-strategy management.</p>
+                    <a href="viewer.html?doc=code-examples/typescript/02-auto-compound/README" class="btn btn-primary">View Example</a>
+                </div>
+
+                <div class="example-card">
+                    <span class="difficulty-badge intermediate">Intermediate</span>
+                    <span class="language-badge typescript">TypeScript</span>
+                    <h4>Impermanent Loss Calculator</h4>
+                    <p>Advanced IL analysis with real-time monitoring and reporting.</p>
+                    <a href="viewer.html?doc=code-examples/typescript/03-impermanent-loss-calc/README" class="btn btn-primary">View Example</a>
+                </div>
+
+                <div class="example-card">
+                    <span class="difficulty-badge advanced">Advanced</span>
+                    <span class="language-badge typescript">TypeScript</span>
+                    <h4>DLMM Range Orders</h4>
+                    <p>Limit orders using DLMM with concentrated liquidity management.</p>
+                    <a href="viewer.html?doc=code-examples/typescript/04-dlmm-range-orders/README" class="btn btn-primary">View Example</a>
+                </div>
+
+                <div class="example-card">
+                    <span class="difficulty-badge advanced">Advanced</span>
+                    <span class="language-badge typescript">TypeScript</span>
+                    <h4>Multi-Hop Routing</h4>
+                    <p>Sophisticated routing algorithms with path optimization.</p>
+                    <a href="viewer.html?doc=code-examples/typescript/05-multi-hop-routing/README" class="btn btn-primary">View Example</a>
+                </div>
+
+                <div class="example-card">
+                    <span class="difficulty-badge beginner">Beginner</span>
+                    <span class="language-badge typescript">TypeScript</span>
+                    <h4>Basic Liquidity Provision</h4>
+                    <p>Learn the fundamentals of providing liquidity with guidance.</p>
+                    <a href="viewer.html?doc=tutorials/02-add-liquidity" class="btn btn-primary">View Tutorial</a>
+                </div>
+            </div>
+            
+            <div id="rust-examples" class="examples-grid" style="display: none;">
+                <div class="example-card">
+                    <span class="difficulty-badge beginner">Beginner</span>
+                    <span class="language-badge rust">Rust</span>
+                    <h4>High-Performance Swaps</h4>
+                    <p>Native Rust implementation with MEV protection and batch operations.</p>
+                    <a href="viewer.html?doc=code-examples/rust/01-basic-swap/README" class="btn btn-primary">View Example</a>
+                </div>
+
+                <div class="example-card">
+                    <span class="difficulty-badge intermediate">Intermediate</span>
+                    <span class="language-badge rust">Rust</span>
+                    <h4>Auto-Compound Engine</h4>
+                    <p>High-performance yield optimization with async runtime and gas optimization.</p>
+                    <a href="viewer.html?doc=code-examples/rust/02-auto-compound/README" class="btn btn-primary">View Example</a>
+                </div>
+
+                <div class="example-card">
+                    <span class="difficulty-badge intermediate">Intermediate</span>
+                    <span class="language-badge rust">Rust</span>
+                    <h4>IL Analytics Engine</h4>
+                    <p>Precise IL calculations with high-performance analytics and reporting.</p>
+                    <a href="viewer.html?doc=code-examples/rust/03-impermanent-loss-calc/README" class="btn btn-primary">View Example</a>
+                </div>
+
+                <div class="example-card">
+                    <span class="difficulty-badge advanced">Advanced</span>
+                    <span class="language-badge rust">Rust</span>
+                    <h4>DLMM Trading System</h4>
+                    <p>Advanced order management with real-time monitoring and execution.</p>
+                    <a href="viewer.html?doc=code-examples/rust/04-dlmm-range-orders/README" class="btn btn-primary">View Example</a>
+                </div>
+
+                <div class="example-card">
+                    <span class="difficulty-badge advanced">Advanced</span>
+                    <span class="language-badge rust">Rust</span>
+                    <h4>Graph-Based Routing</h4>
+                    <p>Advanced routing with A* algorithms and arbitrage detection.</p>
+                    <a href="viewer.html?doc=code-examples/rust/05-multi-hop-routing/README" class="btn btn-primary">View Example</a>
+                </div>
+
+                <div class="example-card">
+                    <span class="difficulty-badge intermediate">Intermediate</span>
+                    <span class="language-badge rust">Rust</span>
+                    <h4>Rust SDK Overview</h4>
+                    <p>Complete guide to using Rust for high-performance DeFi applications.</p>
+                    <a href="viewer.html?doc=code-examples/rust/README" class="btn btn-primary">View Guide</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats-section">
+            <h2 class="section-title">Documentation Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">52+</div>
+                    <div class="stat-label">Unit Tests</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">15+</div>
+                    <div class="stat-label">Diagrams</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">Doc Pages</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Coverage</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>© 2024 Saros Finance SDK Documentation</p>
+            <p>Built with passion for the Solana DeFi ecosystem</p>
+        </div>
+        <div class="footer-links">
+            <a href="https://github.com/saros-finance" class="footer-link">GitHub</a>
+            <a href="https://docs.saros.finance" class="footer-link">Docs</a>
+            <a href="https://twitter.com/sarosfinance" class="footer-link">Twitter</a>
+            <a href="https://discord.gg/saros" class="footer-link">Discord</a>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/home.js"></script>
+</body>
+</html>

@@ -2,13 +2,23 @@
   "name": "saros-sdk-documentation",
   "version": "1.0.0",
   "description": "Comprehensive developer documentation for Saros Finance SDKs",
+  "homepage": "https://saros-finance.github.io/saros-sdk-docs",
   "private": true,
   "workspaces": [
     "code-examples/typescript/*"
   ],
   "scripts": {
-    "build": "npm run build:examples",
+    "serve": "node server.js",
+    "dev": "npm run serve",
+    "docs": "npm run serve",
+    "serve:static": "npx http-server public -p 8080 -c-1 --cors",
+    "build": "npm run build:static",
+    "build:static": "npm run copy:docs && npm run copy:examples",
+    "copy:docs": "mkdir -p public/docs && cp -r api-reference architecture core-concepts getting-started guides tutorials troubleshooting.md README.md CONTRIBUTING.md public/docs/",
+    "copy:examples": "cp -r code-examples public/",
     "build:examples": "npm run build --workspaces",
+    "predeploy": "npm run build:static",
+    "deploy": "gh-pages -d public",
     "test": "npm run test --workspaces",
     "dev:swap": "npm run dev -w code-examples/typescript/01-swap-with-slippage",
     "dev:compound": "npm run dev -w code-examples/typescript/02-auto-compound",
@@ -38,6 +48,8 @@
   "author": "Saros Finance",
   "license": "MIT",
   "devDependencies": {
+    "gh-pages": "^6.1.0",
+    "http-server": "^14.1.1",
     "prettier": "^3.1.0",
     "typescript": "^5.3.2"
   },

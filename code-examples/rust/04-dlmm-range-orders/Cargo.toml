@@ -1,0 +1,60 @@
+[package]
+name = "dlmm-range-orders"
+version = "0.1.0"
+edition = "2021"
+description = "DLMM Range Orders Trading System with Advanced Strategies"
+authors = ["Saros Protocol"]
+
+[dependencies]
+# Core dependencies
+anyhow = "1.0"
+tokio = { version = "1.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+log = "0.4"
+env_logger = "0.11"
+
+# Math and calculations
+rust_decimal = { version = "1.33", features = ["serde-float"] }
+rust_decimal_macros = "1.33"
+
+# Collections and data structures
+indexmap = "2.1"
+
+# Async and futures
+futures = "0.3"
+
+# Configuration and environment
+dotenvy = "0.15"
+config = "0.14"
+
+# Time handling
+chrono = { version = "0.4", features = ["serde"] }
+
+# Random number generation
+rand = "0.8"
+
+# Saros SDK (mock)
+saros-dlmm-sdk = { path = "../mock-rust-sdk" }
+
+# Solana dependencies
+solana-client = "1.17"
+solana-sdk = "1.17"
+
+# UUID for order IDs
+uuid = { version = "1.6", features = ["v4", "serde"] }
+
+# Notification system
+reqwest = { version = "0.11", features = ["json"] }
+
+# CLI framework
+clap = { version = "4.4", features = ["derive"] }
+
+# Configuration management
+toml = "0.8"
+
+# Additional dependencies
+once_cell = "1.19"
+
+[dev-dependencies]
+tokio-test = "0.4"

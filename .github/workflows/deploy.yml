@@ -1,0 +1,82 @@
+name: Deploy Saros SDK Documentation to GitHub Pages
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm run install:all
+        
+      - name: Build static documentation site
+        run: |
+          # Create build directory
+          mkdir -p docs-build
+          
+          # Copy public assets (HTML, CSS, JS)
+          cp -r public/* docs-build/
+          
+          # Copy all documentation directories
+          cp -r api-reference docs-build/
+          cp -r architecture docs-build/
+          cp -r core-concepts docs-build/
+          cp -r getting-started docs-build/
+          cp -r guides docs-build/
+          cp -r tutorials docs-build/
+          cp -r code-examples docs-build/
+          
+          # Copy root documentation files
+          cp README.md docs-build/
+          cp troubleshooting.md docs-build/
+          cp CONTRIBUTING.md docs-build/
+          
+          # Create a .nojekyll file to ensure GitHub Pages serves all files
+          touch docs-build/.nojekyll
+          
+          # Verify build output
+          echo "Build contents:"
+          ls -la docs-build/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './docs-build'
+          
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

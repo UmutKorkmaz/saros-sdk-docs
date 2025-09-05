@@ -43,6 +43,12 @@ logs/
 # Testing
 coverage/
 .nyc_output/
+*.test.js
+*.test.ts
+*.test.log
+.env.test
+__tests__/
+test-output.log
 
 # Solana
 .anchor/
@@ -57,6 +63,13 @@ site/
 tmp/
 temp/
 *.tmp
+reports/
+devnet-wallet.json
+*-wallet.json
+*wrapper*.ts
+*wrapper*.js
+*bypass*.ts
+*bypass*.js
 
 # Package manager
 .npm/

@@ -1,0 +1,60 @@
+[package]
+name = "multi-hop-routing"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core async runtime and utilities
+tokio = { version = "1.0", features = ["full"] }
+anyhow = "1.0"
+thiserror = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Graph algorithms and data structures
+petgraph = "0.6"
+priority-queue = "2.0"
+indexmap = "2.0"
+
+# Numerical computation
+num-traits = "0.2"
+rust_decimal = "1.32"
+rust_decimal_macros = "1.32"
+
+# Solana and DeFi
+solana-sdk = "1.17"
+solana-client = "1.17"
+anchor-client = "0.29"
+spl-token = "4.0"
+
+# Configuration and environment
+dotenv = "0.15"
+clap = { version = "4.0", features = ["derive"] }
+config = "0.13"
+
+# Caching and performance
+moka = { version = "0.12", features = ["future"] }
+dashmap = "5.5"
+
+# Logging and metrics
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+prometheus = "0.13"
+
+# Utilities
+uuid = { version = "1.0", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+rand = "0.8"
+reqwest = "0.11"
+
+# Mock SDK for development
+saros-dlmm-sdk = { path = "../mock-rust-sdk" }
+
+[dev-dependencies]
+criterion = "0.5"
+proptest = "1.0"
+
+[[bin]]
+name = "route_analyzer"
+path = "src/main.rs"
+
