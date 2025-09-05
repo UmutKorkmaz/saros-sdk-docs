@@ -54,6 +54,7 @@ jobs:
           cp README.md docs-build/
           cp troubleshooting.md docs-build/
           cp CONTRIBUTING.md docs-build/
+          cp EXAMPLE_GALLERY.md docs-build/
           rm -rf docs-build/docs/ docs-build/code-examples/ || true
           cp -r code-examples docs-build/
 

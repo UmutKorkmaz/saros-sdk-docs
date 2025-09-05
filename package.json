@@ -2,7 +2,7 @@
   "name": "saros-sdk-documentation",
   "version": "1.0.0",
   "description": "Comprehensive developer documentation for Saros Finance SDKs",
-  "homepage": "https://saros-finance.github.io/saros-sdk-docs",
+  "homepage": "https://umutkorkmaz.github.io/saros-sdk-docs",
   "private": true,
   "workspaces": [
     "code-examples/typescript/*"
@@ -33,7 +33,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/saros-finance/sdk-documentation"
+    "url": "https://github.com/UmutKorkmaz/saros-sdk-docs"
   },
   "keywords": [
     "saros",

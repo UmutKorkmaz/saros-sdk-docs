@@ -26,7 +26,7 @@
 
 ```bash
 # Clone and serve documentation
-git clone https://github.com/saros-finance/saros-sdk-docs
+git clone https://github.com/UmutKorkmaz/saros-sdk-docs
 cd saros-sdk-docs
 
 # Start documentation server
