@@ -6,7 +6,7 @@
 
 ### ⚡ TypeScript Examples
 
-#### 🔄 [01. Swap with Dynamic Slippage](./code-examples/typescript/01-swap-with-slippage/)
+#### 🔄 [01. Swap with Dynamic Slippage](https://github.com/UmutKorkmaz/saros-sdk-docs/tree/main/code-examples/typescript/01-swap-with-slippage)
 **Difficulty**: 🟢 Beginner | **Focus**: Core Swaps
 
 Production swap implementation with intelligent slippage protection and MEV resistance.
@@ -27,7 +27,7 @@ npm install && npm run dev
 
 ---
 
-#### 🏦 [02. Auto-Compound Yield](./code-examples/typescript/02-auto-compound/)
+#### 🏦 [02. Auto-Compound Yield](https://github.com/UmutKorkmaz/saros-sdk-docs/tree/main/code-examples/typescript/02-auto-compound)
 **Difficulty**: 🟡 Intermediate | **Focus**: Yield Optimization
 
 Advanced yield farming automation with multi-strategy management and risk controls.
@@ -48,7 +48,7 @@ npm install && npm run dev
 
 ---
 
-#### 📊 [03. Impermanent Loss Calculator](./code-examples/typescript/03-impermanent-loss-calc/)
+#### 📊 [03. Impermanent Loss Calculator](https://github.com/UmutKorkmaz/saros-sdk-docs/tree/main/code-examples/typescript/03-impermanent-loss-calc)
 **Difficulty**: 🟡 Intermediate | **Focus**: Risk Analysis
 
 Comprehensive IL analysis toolkit with precise mathematical calculations and reporting.
@@ -69,7 +69,7 @@ npm install && npm run dev
 
 ---
 
-#### 🎯 [04. DLMM Range Orders](./code-examples/typescript/04-dlmm-range-orders/)
+#### 🎯 [04. DLMM Range Orders](https://github.com/UmutKorkmaz/saros-sdk-docs/tree/main/code-examples/typescript/04-dlmm-range-orders)
 **Difficulty**: 🔴 Advanced | **Focus**: Limit Orders
 
 Sophisticated limit order implementation with market making capabilities.
@@ -90,7 +90,7 @@ npm install && npm run dev
 
 ---
 
-#### 🛤️ [05. Multi-Hop Routing](./code-examples/typescript/05-multi-hop-routing/)
+#### 🛤️ [05. Multi-Hop Routing](https://github.com/UmutKorkmaz/saros-sdk-docs/tree/main/code-examples/typescript/05-multi-hop-routing)
 **Difficulty**: 🔴 Advanced | **Focus**: Routing & Arbitrage
 
 Advanced routing algorithms with cross-DEX arbitrage capabilities.
@@ -113,7 +113,7 @@ npm install && npm run dev
 
 ### 🦀 Rust Examples
 
-#### ⚡ [01. High-Performance Swap](./code-examples/rust/01-basic-swap/)
+#### ⚡ [01. High-Performance Swap](https://github.com/UmutKorkmaz/saros-sdk-docs/tree/main/code-examples/rust/01-basic-swap)
 **Difficulty**: 🟡 Intermediate | **Focus**: Performance
 
 Native Rust implementation optimized for high-frequency trading with sub-100ms execution.
@@ -134,7 +134,7 @@ cargo run -- swap --amount 1.5 --token-in SOL --token-out USDC
 
 ---
 
-#### 🔄 [02. Auto-Compound Engine](./code-examples/rust/02-auto-compound/)
+#### 🔄 [02. Auto-Compound Engine](https://github.com/UmutKorkmaz/saros-sdk-docs/tree/main/code-examples/rust/02-auto-compound)
 **Difficulty**: 🔴 Advanced | **Focus**: System Architecture
 
 Multi-threaded yield optimization engine with enterprise-grade monitoring.
@@ -155,7 +155,7 @@ cargo run -- --config production.toml
 
 ---
 
-#### 🧮 [03. Impermanent Loss Calculator](./code-examples/rust/03-impermanent-loss-calc/)
+#### 🧮 [03. Impermanent Loss Calculator](https://github.com/UmutKorkmaz/saros-sdk-docs/tree/main/code-examples/rust/03-impermanent-loss-calc)
 **Difficulty**: 🟡 Intermediate | **Focus**: Mathematical Precision
 
 High-precision IL calculations with time-series analysis and API endpoints.
@@ -176,7 +176,7 @@ cargo run -- analyze --pool <POOL_ADDRESS> --days 30
 
 ---
 
-#### 🎯 [04. DLMM Range Orders](./code-examples/rust/04-dlmm-range-orders/)
+#### 🎯 [04. DLMM Range Orders](https://github.com/UmutKorkmaz/saros-sdk-docs/tree/main/code-examples/rust/04-dlmm-range-orders)
 **Difficulty**: 🔴 Advanced | **Focus**: Trading Systems
 
 Production trading system with microsecond-level latency and advanced order management.
@@ -197,7 +197,7 @@ cargo run --release -- trade --strategy grid --config strategies/grid.toml
 
 ---
 
-#### 🌐 [05. Multi-Hop Routing](./code-examples/rust/05-multi-hop-routing/)
+#### 🌐 [05. Multi-Hop Routing](https://github.com/UmutKorkmaz/saros-sdk-docs/tree/main/code-examples/rust/05-multi-hop-routing)
 **Difficulty**: ⚫ Expert | **Focus**: Graph Algorithms
 
 Advanced routing engine with parallel execution and sophisticated arbitrage detection.
