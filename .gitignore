@@ -58,6 +58,9 @@ test-ledger/
 # Documentation build
 docs/.vuepress/dist/
 site/
+docs-build/
+docs-build-test/
+public/docs/
 
 # Temporary files
 tmp/
@@ -70,6 +73,11 @@ devnet-wallet.json
 *wrapper*.js
 *bypass*.ts
 *bypass*.js
+test-build.sh
+diagnose.js
+
+# Log files from examples
+code-examples/*/logs/
 
 # Package manager
 .npm/

@@ -146,8 +146,19 @@ async function loadDocument() {
         // Show loading state
         contentEl.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
 
-        // Build correct file path - docs folder is one level up
-        let fetchPath = '../docs/' + docPath;
+        // Build correct file path for GitHub Pages deployment
+        let fetchPath;
+        
+        // Check if we're running on GitHub Pages
+        const isGitHubPages = window.location.hostname.includes('github.io');
+        
+        if (isGitHubPages) {
+            // For GitHub Pages, files are at root level
+            fetchPath = docPath;
+        } else {
+            // For local development, docs folder is one level up
+            fetchPath = '../docs/' + docPath;
+        }
 
         // Remove leading slash if present
         if (fetchPath.startsWith('/')) {
@@ -161,6 +172,7 @@ async function loadDocument() {
 
         console.log('Attempting to fetch:', fetchPath);
         console.log('Original docPath:', docPath);
+        console.log('Is GitHub Pages:', isGitHubPages);
 
         // Fetch markdown file with error handling
         let response;
@@ -169,7 +181,13 @@ async function loadDocument() {
         } catch (fetchError) {
             console.error('Fetch failed:', fetchError);
             // Try alternative paths if first fetch fails
-            const alternativePaths = [
+            const alternativePaths = isGitHubPages ? [
+                docPath,
+                `docs/${docPath}`,
+                `api-reference/${docPath.replace('api-reference/', '')}`,
+                `guides/${docPath.replace('guides/', '')}`,
+                `tutorials/${docPath.replace('tutorials/', '')}`
+            ] : [
                 `docs/${docPath}`,
                 `../${docPath}`,
                 docPath
